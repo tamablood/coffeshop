@@ -73,7 +73,7 @@ input:focus~label,input:not(:placeholder-shown)~label{
 }
 .recover a{
     text-decoration:none;
-    color:rgb(222 194 119);
+    color:rgb(0, 0, 0);
 }
 .recover a:hover{
     color:#fffbf2;
