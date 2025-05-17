@@ -135,3 +135,16 @@ button:hover{
     text-decoration:underline;
     color:#33211d;
 }
+.back-arrow {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #69320e;
+    font-size: 24px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.back-arrow:hover {
+    color: #8a4120;
+}
