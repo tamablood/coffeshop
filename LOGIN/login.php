@@ -9,6 +9,7 @@
 </head>
 <body>
     <div class="container" id="signup" style="display:none;">
+      <a href="javascript:history.back()" class="back-arrow" style="color: #000000;"><i class="fas fa-arrow-left" style="color: #000000;"></i></a>
       <h1 class="form-title">Register</h1>
       <form method="post" action="register.php">
         <div class="input-group">
@@ -47,6 +48,7 @@
     </div>
 
     <div class="container" id="signIn">
+        <a href="javascript:history.back()" class="back-arrow" style="color: #000000;"><i class="fas fa-arrow-left" style="color: #000000;"></i></a>
         <h1 class="form-title">Sign In</h1>
         <form method="post" action="register.php">
           <div class="input-group">
