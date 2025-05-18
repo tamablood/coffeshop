@@ -1,39 +1,28 @@
 <?php
 session_start();
-
-// Check if already logged in, redirect to index.php
-if (isset($_SESSION['admin_id'])) {
-    header("Location: index.php");
-    exit;
-}
-
 require_once 'db.php';
 
 $error_message = '';
 
-// Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
+    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
+    $password = trim($_POST['password']);
 
     if (empty($email) || empty($password)) {
         $error_message = "Please enter both email and password.";
     } else {
         try {
-            // Fetch admin with the provided email
             $stmt = $pdo->prepare("SELECT * FROM admin WHERE email = ?");
             $stmt->execute([$email]);
             $admin = $stmt->fetch();
 
-            // For testing: plain text password comparison
-            if ($admin && $admin['password'] === $password) {
-                // Password correct, create session
+            if ($admin && password_verify($password, $admin['password'])) {
+                // Store user details in session
                 $_SESSION['admin_id'] = $admin['id'];
-                $_SESSION['admin_name'] = $admin['name'];
-                $_SESSION['admin_email'] = $admin['email'];
+                $_SESSION['admin_name'] = $admin['name'];  // Get username
 
-                // Redirect to index page
-                header("Location: index.php");
+                // Redirect to personalized URL
+                header("Location: /" . urlencode($_SESSION['admin_name']));
                 exit;
             } else {
                 $error_message = "Invalid email or password.";
