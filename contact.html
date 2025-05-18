@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>KOPPEE - Coffee Shop HTML Template</title>
+    <title>COFFEE - Coffee Shop </title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="Free Website Template" name="keywords">
     <meta content="Free Website Template" name="description">
@@ -22,6 +22,11 @@
     <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
 
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.min.css" rel="stylesheet">
 </head>
@@ -31,7 +36,7 @@
     <div class="container-fluid p-0 nav-bar">
         <nav class="navbar navbar-expand-lg bg-none navbar-dark py-3">
             <a href="index.html" class="navbar-brand px-lg-4 m-0">
-                <h1 class="m-0 display-4 text-uppercase text-white">KOPPEE</h1>
+                <h1 class="m-0 display-4 text-uppercase text-white">COFFEE</h1>
             </a>
             <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
                 <span class="navbar-toggler-icon"></span>
@@ -97,9 +102,7 @@
             </div>
             <div class="row">
                 <div class="col-md-6 pb-5">
-                    <iframe style="width: 100%; height: 443px;"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3001156.4288297426!2d-78.01371936852176!3d42.72876761954724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4ccc4bf0f123a5a9%3A0xddcfc6c1de189567!2sNew%20York%2C%20USA!5e0!3m2!1sen!2sbd!4v1603794290143!5m2!1sen!2sbd"
-                        frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+                    <div id="map" style="width: 100%; height: 443px; border-radius: 5px;"></div>
                 </div>
                 <div class="col-md-6 pb-5">
                     <div class="contact-form">
@@ -200,12 +203,95 @@
     <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
     <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
     <!-- Contact Javascript File -->
     <script src="mail/jqBootstrapValidation.min.js"></script>
     <script src="mail/contact.js"></script>
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <!-- Map Initialization Script -->
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([40.7128, -74.0060], 15); // New York coordinates
+
+        // Add the OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add a marker for the coffee shop
+        const coffeeShopMarker = L.marker([40.7128, -74.0060]).addTo(map);
+
+        // Add a popup to the marker
+        coffeeShopMarker.bindPopup(`
+            <div style="text-align: center;">
+                <h4 style="margin-bottom: 10px;">COFFEE Shop</h4>
+                <p style="margin-bottom: 5px;"><i class="fa fa-map-marker-alt"></i> 123 Street, New York, USA</p>
+                <p style="margin-bottom: 5px;"><i class="fa fa-phone"></i> +012 345 6789</p>
+                <p style="margin-bottom: 0;"><i class="fa fa-clock"></i> Mon-Fri: 8AM-8PM</p>
+            </div>
+        `).openPopup();
+    </script>
+
+    <!-- Form Validation Script -->
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form fields
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const subject = document.getElementById('subject').value.trim();
+            const message = document.getElementById('message').value.trim();
+            
+            // Reset previous error messages
+            document.querySelectorAll('.help-block').forEach(el => el.textContent = '');
+            
+            let isValid = true;
+            
+            // Name validation
+            if (name.length < 2) {
+                document.querySelector('#name').nextElementSibling.textContent = 'Name must be at least 2 characters long';
+                isValid = false;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                document.querySelector('#email').nextElementSibling.textContent = 'Please enter a valid email address';
+                isValid = false;
+            }
+            
+            // Subject validation
+            if (subject.length < 3) {
+                document.querySelector('#subject').nextElementSibling.textContent = 'Subject must be at least 3 characters long';
+                isValid = false;
+            }
+            
+            // Message validation
+            if (message.length < 10) {
+                document.querySelector('#message').nextElementSibling.textContent = 'Message must be at least 10 characters long';
+                isValid = false;
+            }
+            
+            if (isValid) {
+                // Show success message with a more friendly tone
+                document.getElementById('success').innerHTML = `
+                    <div class="alert alert-success" style="background-color: #28a745; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">Thanks for contacting us!</h4>
+                        <p style="margin-bottom: 0;">We've received your message and will get back to you soon.</p>
+                    </div>`;
+                this.reset();
+            }
+        });
+    </script>
 </body>
 
 </html>
