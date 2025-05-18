@@ -12,7 +12,7 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Responsive Sidebar Dashboard</title>
+    <title>Coffee Shop Dashboard</title>
     <style>
         * {
             box-sizing: border-box;
@@ -22,17 +22,16 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
 
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f8f3e9;
             display: flex;
             min-height: 100vh;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 250px;
-            background-color: #fff;
+            background-color: #5D4037;
             padding: 20px 15px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
             height: 100vh;
             transition: all 0.3s ease;
             position: fixed;
@@ -40,6 +39,7 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
             left: 0;
             overflow-x: hidden;
             z-index: 100;
+            color: #D7CCC8;
         }
 
         .sidebar.collapsed {
@@ -51,13 +51,16 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #8D6E63;
+            padding-bottom: 15px;
         }
 
         .sidebar .brand h2 {
             font-size: 18px;
             white-space: nowrap;
             transition: opacity 0.3s;
+            color: #FFECB3;
         }
 
         .sidebar.collapsed .brand h2 {
@@ -70,7 +73,7 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
             background: none;
             border: none;
             cursor: pointer;
-            color: #5b48da;
+            color: #FFECB3;
             padding: 5px;
             z-index: 101;
         }
@@ -86,10 +89,12 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
         .menu-category {
             font-size: 14px;
             font-weight: bold;
-            color: #888;
-            margin: 10px 0;
+            color: #BCAAA4;
+            margin: 15px 0 10px 10px;
             white-space: nowrap;
             transition: opacity 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .sidebar.collapsed .menu-category {
@@ -105,18 +110,18 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
         .menu-item a {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             text-decoration: none;
-            color: #333;
-            padding: 8px 12px;
+            color: #EFEBE9;
+            padding: 10px 12px;
             border-radius: 6px;
             transition: background-color 0.2s;
         }
 
         .menu-item a:hover,
         .menu-item.active a {
-            background-color: #5b48da;
-            color: #fff;
+            background-color: #8D6E63;
+            color: #FFF8E1;
         }
 
         .menu-item a i {
@@ -131,7 +136,7 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
 
         .main-content {
             margin-left: 250px;
-            padding: 20px;
+            padding: 25px;
             flex-grow: 1;
             transition: margin-left 0.3s ease;
             width: calc(100% - 250px);
@@ -144,9 +149,26 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
 
         .header {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            background-color: #D7CCC8;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-title {
+            font-size: 24px;
+            color: #4E342E;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dashboard-title:before {
+            content: "☕";
+            font-size: 28px;
         }
 
         .user-profile {
@@ -155,13 +177,11 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
             gap: 10px;
             position: relative;
             cursor: pointer;
+            color: #4E342E;
         }
 
-        .user-profile img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
+        .user-avatar {
+            font-size: 24px;
             cursor: pointer;
         }
 
@@ -193,16 +213,15 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
         }
 
         .admin-dropdown-item:hover {
-            background-color: #f8f8f8;
-            color: #5b48da;
+            background-color: #f8f3e9;
+            color: #5D4037;
         }
 
         .admin-dropdown-divider {
-            border-top: 1px solid #eee;
+            border-top: 1px solid #EFEBE9;
             margin: 8px 0;
         }
 
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -218,65 +237,75 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
         .modal-content {
             background-color: #fefefe;
             margin: 10% auto;
-            padding: 20px;
+            padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             width: 400px;
             max-width: 90%;
+            border-top: 5px solid #8D6E63;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .modal-title {
             font-size: 18px;
             font-weight: 600;
+            color: #5D4037;
         }
 
         .close-modal {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             cursor: pointer;
+            color: #8D6E63;
+        }
+
+        .close-modal:hover {
+            color: #5D4037;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 500;
+            color: #5D4037;
         }
 
         .form-group input {
             width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #ddd;
+            padding: 10px 12px;
+            border: 1px solid #D7CCC8;
             border-radius: 4px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #8D6E63;
         }
 
         .btn {
-            padding: 8px 15px;
-            background-color: #5b48da;
+            padding: 10px 18px;
+            background-color: #8D6E63;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            transition: background-color 0.2s;
         }
 
         .btn:hover {
-            background-color: #4c3cb8;
-        }
-
-        .dashboard-title {
-            font-size: 24px;
-            margin-bottom: 20px;
+            background-color: #6D4C41;
         }
 
         .dashboard-cards {
@@ -287,21 +316,38 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
 
         .card {
             background-color: #fff;
-            padding: 20px;
+            padding: 22px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
             width: 100%;
             max-width: 300px;
+            border-left: 4px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
         }
 
         .card-icon {
-            font-size: 30px;
-            margin-bottom: 10px;
+            font-size: 32px;
+            margin-bottom: 15px;
         }
 
-        .bg-primary { color: #5b48da; }
-        .bg-success { color: #28a745; }
-        .bg-warning { color: #ffc107; }
+        .card-title {
+            color: #5D4037;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4E342E;
+        }
+
+        .bg-revenue { color: #A1887F; border-left-color: #A1887F; }
+        .bg-orders { color: #8D6E63; border-left-color: #8D6E63; }
+        .bg-customers { color: #6D4C41; border-left-color: #6D4C41; }
 
         @media (max-width: 768px) {
             .sidebar {
@@ -331,18 +377,25 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
             .card {
                 max-width: 100%;
             }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .user-profile {
+                align-self: flex-end;
+            }
         }
     </style>
 </head>
 <body>
-<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <div class="brand">
         <button class="hamburger" id="toggle-btn">☰</button>
-        <h2>Dashboard</h2>
+        <h2>Brew & Bean</h2>
     </div>
     <div class="sidebar-menu">
-        <p class="menu-category">Main</p>
+        <p class="menu-category">Management</p>
         <ul>
             <li class="menu-item active">
                 <a href="index.php"><i>📊</i> <span>Dashboard</span></a>
@@ -359,13 +412,12 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
         </ul>
     </div>
 </div>
-
-<!-- Main content -->
 <div class="main-content">
     <div class="header">
+        <h2 class="dashboard-title">Coffee Shop Dashboard</h2>
         <div class="user-profile" id="admin-profile">
             <span>Admin</span>
-            <img src="images.jpg" alt="User" id="admin-img">
+            <div class="user-avatar">👤</div>
             <div class="admin-dropdown" id="admin-dropdown">
                 <div class="admin-dropdown-item" onclick="openModal('profile-modal')">
                     <span>👤</span> Edit Profile
@@ -377,40 +429,32 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
                     <span>🔒</span> Change Password
                 </div>
                 <div class="admin-dropdown-divider"></div>
-                <div class="admin-dropdown-item" onclick="openModal('photo-modal')">
-                    <span>📷</span> Upload Photo
-                </div>
-                <div class="admin-dropdown-divider"></div>
-                <div class="admin-dropdown-item">
+                <div class="admin-dropdown-item" onclick="logout()">
                     <span>🚪</span> Logout
                 </div>
             </div>
         </div>
     </div>
 
-    <h2 class="dashboard-title">Restaurant Dashboard</h2>
-
     <div class="dashboard-cards">
         <div class="card">
-            <div class="card-icon bg-primary">💰</div>
+            <div class="card-icon bg-revenue">💰</div>
             <h3 class="card-title">Revenue Today</h3>
             <p class="card-value" data-type="revenue">$<?= number_format($revenue ?? 0, 2) ?></p>
         </div>
         <div class="card">
-            <div class="card-icon bg-success">📋</div>
+            <div class="card-icon bg-orders">📋</div>
             <h3 class="card-title">Today's Orders</h3>
             <p class="card-value" data-type="orders"><?= $orders ?></p>
         </div>
         <div class="card">
-            <div class="card-icon bg-warning">👥</div>
+            <div class="card-icon bg-customers">👥</div>
             <h3 class="card-title">New Customers</h3>
             <p class="card-value" data-type="customers"><?= $customers ?></p>
         </div>
     </div>
 </div>
 
-<!-- Modals -->
-<!-- Edit Profile Modal -->
 <div id="profile-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -427,7 +471,6 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
     </div>
 </div>
 
-<!-- Email Modal -->
 <div id="email-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -452,7 +495,6 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
     </div>
 </div>
 
-<!-- Password Modal -->
 <div id="password-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -477,24 +519,10 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
     </div>
 </div>
 
-<!-- Photo Upload Modal -->
-<div id="photo-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">Upload Photo</h3>
-            <span class="close-modal" onclick="closeModal('photo-modal')">&times;</span>
-        </div>
-        <form id="photo-form" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="profile-photo">Select Image</label>
-                <input type="file" id="profile-photo" name="profile_photo" accept="image/*" required>
-            </div>
-            <button type="submit" class="btn">Upload</button>
-        </form>
-    </div>
-</div>
-
 <script>
+    function logout() {
+        window.location.href = 'logout.php';
+    }
     const toggleBtn = document.getElementById('toggle-btn');
     const sidebar = document.getElementById('sidebar');
 
@@ -513,7 +541,6 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
     window.addEventListener('load', checkScreenSize);
     window.addEventListener('resize', checkScreenSize);
 
-    // Admin dropdown functionality
     const adminProfile = document.getElementById('admin-profile');
     const adminDropdown = document.getElementById('admin-dropdown');
 
@@ -522,14 +549,12 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
         adminDropdown.classList.toggle('show');
     });
 
-    // Close dropdown when clicking elsewhere
     document.addEventListener('click', function(event) {
         if (!adminProfile.contains(event.target)) {
             adminDropdown.classList.remove('show');
         }
     });
 
-    // Modal functions
     function openModal(modalId) {
         document.getElementById(modalId).style.display = 'block';
         adminDropdown.classList.remove('show');
@@ -539,7 +564,6 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
         document.getElementById(modalId).style.display = 'none';
     }
 
-    // Close modal when clicking outside
     window.addEventListener('click', function(event) {
         const modals = document.getElementsByClassName('modal');
         for (let i = 0; i < modals.length; i++) {
@@ -549,52 +573,30 @@ $customers = $pdo->query("SELECT COUNT(*) FROM customers WHERE DATE(created_at) 
         }
     });
 
-    // Form submissions
     document.getElementById('profile-form').addEventListener('submit', function(event) {
         event.preventDefault();
-        // Here you would typically send an AJAX request to update the profile
         alert('Profile updated successfully!');
         closeModal('profile-modal');
     });
 
     document.getElementById('email-form').addEventListener('submit', function(event) {
         event.preventDefault();
-        // Validate email format and match
         if (document.getElementById('new-email').value !== document.getElementById('confirm-email').value) {
             alert('Emails do not match!');
             return;
         }
-        // Here you would typically send an AJAX request to update the email
         alert('Email updated successfully!');
         closeModal('email-modal');
     });
 
     document.getElementById('password-form').addEventListener('submit', function(event) {
         event.preventDefault();
-        // Validate password match
         if (document.getElementById('new-password').value !== document.getElementById('confirm-password').value) {
             alert('Passwords do not match!');
             return;
         }
-        // Here you would typically send an AJAX request to update the password
         alert('Password updated successfully!');
         closeModal('password-modal');
-    });
-
-    document.getElementById('photo-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        // Here you would typically send an AJAX request to upload the photo
-        const fileInput = document.getElementById('profile-photo');
-        if (fileInput.files.length > 0) {
-            // Simple preview (in a real application, you'd upload the file to the server)
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('admin-img').src = e.target.result;
-            };
-            reader.readAsDataURL(fileInput.files[0]);
-            alert('Photo uploaded successfully!');
-            closeModal('photo-modal');
-        }
     });
 </script>
 </body>

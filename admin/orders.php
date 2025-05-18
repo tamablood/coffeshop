@@ -41,99 +41,24 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Management</title>
     <style>
-        :root {
-            --primary: #5b48da;
-            --primary-light: #8172e6;
-            --secondary: #24263c;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --warning: #f39c12;
-            --info: #3498db;
-            --light: #f8f9fa;
-            --dark: #1a1c2d;
-            --border: #e9ecef;
-        }
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f8f3e9;
             display: flex;
             min-height: 100vh;
         }
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
 
-        .btn-edit {
-            background-color: var(--info);
-            color: white;
-            border: none;
-            border-radius: 3px;
-            margin-right: 5px;
-            cursor: pointer;
-        }
-
-        .btn-delete {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            color: white;
-        }
-        .badge-danger {
-            background-color: var(--danger);
-        }
-        .user-image {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 5px;
-        }
-
-        .user-container {
-            display: flex;
-            align-items: center;
-        }
-        .badge-primary {
-            background-color: var(--primary);
-        }
-
-        .badge-success {
-            background-color: var(--success);
-        }
-
-        .badge-warning {
-            background-color: var(--warning);
-        }
-
-        .badge-danger {
-            background-color: var(--danger);
-        }
-
-        .badge-info {
-            background-color: var(--info);
-        }
-
-        /* Sidebar */
         .sidebar {
             width: 250px;
-            background-color: #fff;
+            background-color: #5D4037;
             padding: 20px 15px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
             height: 100vh;
             transition: all 0.3s ease;
             position: fixed;
@@ -141,6 +66,7 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
             left: 0;
             overflow-x: hidden;
             z-index: 100;
+            color: #D7CCC8;
         }
 
         .sidebar.collapsed {
@@ -152,13 +78,16 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #8D6E63;
+            padding-bottom: 15px;
         }
 
         .sidebar .brand h2 {
             font-size: 18px;
             white-space: nowrap;
             transition: opacity 0.3s;
+            color: #FFECB3;
         }
 
         .sidebar.collapsed .brand h2 {
@@ -171,7 +100,7 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
             background: none;
             border: none;
             cursor: pointer;
-            color: #5b48da;
+            color: #FFECB3;
             padding: 5px;
             z-index: 101;
         }
@@ -187,10 +116,12 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
         .menu-category {
             font-size: 14px;
             font-weight: bold;
-            color: #888;
-            margin: 10px 0;
+            color: #BCAAA4;
+            margin: 15px 0 10px 10px;
             white-space: nowrap;
             transition: opacity 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .sidebar.collapsed .menu-category {
@@ -206,18 +137,18 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
         .menu-item a {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             text-decoration: none;
-            color: #333;
-            padding: 8px 12px;
+            color: #EFEBE9;
+            padding: 10px 12px;
             border-radius: 6px;
             transition: background-color 0.2s;
         }
 
         .menu-item a:hover,
         .menu-item.active a {
-            background-color: #5b48da;
-            color: #fff;
+            background-color: #8D6E63;
+            color: #FFF8E1;
         }
 
         .menu-item a i {
@@ -230,10 +161,9 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
             display: none;
         }
 
-        /* Main content adjustment */
         .main-content {
             margin-left: 250px;
-            padding: 20px;
+            padding: 25px;
             flex-grow: 1;
             transition: margin-left 0.3s ease;
             width: calc(100% - 250px);
@@ -244,44 +174,103 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
             width: calc(100% - 70px);
         }
 
-        /* Table Card */
-        .table-card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-        }
-
-        .table-card-header {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            margin-bottom: 30px;
+            background-color: #D7CCC8;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: #4E342E;
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
 
-        .table-card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--secondary);
+        .page-title:before {
+            content: "📋";
+            font-size: 28px;
         }
 
-        .btn-primary {
-            background-color: var(--primary);
+        .btn {
+            padding: 10px 18px;
+            background-color: #8D6E63;
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s;
+            transition: background-color 0.2s;
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-light);
+        .btn:hover {
+            background-color: #6D4C41;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .btn-edit {
+            background-color: #8D6E63;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background-color: #B71C1C;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            background-color: #8D6E63;
+        }
+
+        .badge-new {
+            background-color: #6D4C41;
+        }
+
+        .badge-preparing {
+            background-color: #FF9800;
+        }
+
+        .badge-delivery {
+            background-color: #2196F3;
+        }
+
+        .badge-delivered {
+            background-color: #4CAF50;
+        }
+
+        .badge-cancelled {
+            background-color: #B71C1C;
+        }
+
+        .table-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-x: auto;
         }
 
         table {
@@ -291,14 +280,14 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
         }
 
         th, td {
-            padding: 12px 15px;
+            padding: 15px;
             text-align: left;
         }
 
         th {
-            background-color: #f8f9fa;
+            background-color: #EFEBE9;
             font-weight: 500;
-            color: #777;
+            color: #5D4037;
             font-size: 14px;
         }
 
@@ -306,7 +295,10 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
             border-bottom: 1px solid #f1f1f1;
         }
 
-        /* Modal */
+        tbody tr:hover {
+            background-color: #FFF8E1;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -315,45 +307,76 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
             overflow: auto;
         }
 
         .modal-content {
-            background-color: white;
+            background-color: #fefefe;
             margin: 10% auto;
-            padding: 20px;
+            padding: 25px;
             border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            width: 500px;
+            max-width: 90%;
+            border-top: 5px solid #8D6E63;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #5D4037;
         }
 
         .close {
-            position: absolute;
-            right: 15px;
-            top: 10px;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
             cursor: pointer;
+            color: #8D6E63;
+        }
+
+        .close:hover {
+            color: #5D4037;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 500;
+            color: #5D4037;
         }
 
         .form-control {
             width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #ddd;
+            padding: 10px 12px;
+            border: 1px solid #D7CCC8;
             border-radius: 4px;
+            transition: border-color 0.2s;
             font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #8D6E63;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235D4037' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 28px;
         }
 
         .form-buttons {
@@ -364,55 +387,70 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
         }
 
         .btn-cancel {
-            background-color: #f1f1f1;
-            color: #333;
+            background-color: #EFEBE9;
+            color: #5D4037;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 10px 18px;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 14px;
         }
 
-        /* Responsive adjustments */
+        .btn-cancel:hover {
+            background-color: #D7CCC8;
+        }
+
+        .item-row {
+            margin-bottom: 10px;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
             }
-
             .sidebar .brand h2,
             .sidebar .menu-category,
             .sidebar .menu-item span {
                 display: none;
             }
-
             .main-content {
                 margin-left: 70px;
                 width: calc(100% - 70px);
             }
-
             .sidebar.expanded {
                 width: 250px;
             }
-
             .sidebar.expanded .brand h2,
             .sidebar.expanded .menu-category,
             .sidebar.expanded .menu-item span {
                 display: block;
                 opacity: 1;
             }
-
-            .table-card-header {
+            .header {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 15px;
             }
-
             .form-buttons {
                 flex-direction: column;
             }
-
-            .btn-cancel, .btn-primary {
+            .btn-cancel, .btn {
                 width: 100%;
                 text-align: center;
             }
+        }
+
+        .user-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-image {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -420,10 +458,10 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
 <div class="sidebar" id="sidebar">
     <div class="brand">
         <button class="hamburger" id="toggle-btn">☰</button>
-        <h2>Dashboard</h2>
+        <h2>Brew & Bean</h2>
     </div>
     <div class="sidebar-menu">
-        <p class="menu-category">Main</p>
+        <p class="menu-category">Management</p>
         <ul>
             <li class="menu-item">
                 <a href="index.php"><i>📊</i> <span>Dashboard</span></a>
@@ -440,27 +478,55 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
         </ul>
     </div>
 </div>
+
 <div class="main-content">
+    <div class="header">
+        <h2 class="page-title">Order Management</h2>
+        <button class="btn" onclick="document.getElementById('newOrderModal').style.display='block'">+ New Order</button>
+    </div>
+
     <div class="table-card">
-        <div class="table-card-header">
-            <h3 class="table-card-title">Recent Orders</h3>
-            <button class="btn-primary" onclick="document.getElementById('newOrderModal').style.display='block'">+ New Order</button>
-        </div>
         <table>
             <thead>
-            <tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
             </thead>
             <tbody>
             <?php foreach ($orders as $order): ?>
                 <tr>
                     <td>#ORD-<?= $order['id'] ?></td>
-                    <td><div class="user-container"><img src="/api/placeholder/30/30" alt="User" class="user-image"><span><?= htmlspecialchars($order['customer_name']) ?></span></div></td>
+                    <td>
+                        <div class="user-container">
+                            <img src="/api/placeholder/30/30" alt="User" class="user-image">
+                            <span><?= htmlspecialchars($order['customer_name']) ?></span>
+                        </div>
+                    </td>
                     <td><?= htmlspecialchars($order['items']) ?></td>
                     <td>$<?= number_format($order['total'], 2) ?></td>
-                    <td><span class="badge badge-primary"><?= htmlspecialchars($order['status']) ?></span></td>
+                    <td>
+                        <?php
+                        $statusClass = 'badge';
+                        switch($order['status']) {
+                            case 'New': $statusClass .= ' badge-new'; break;
+                            case 'Preparing': $statusClass .= ' badge-preparing'; break;
+                            case 'Out for Delivery': $statusClass .= ' badge-delivery'; break;
+                            case 'Delivered': $statusClass .= ' badge-delivered'; break;
+                            case 'Cancelled': $statusClass .= ' badge-cancelled'; break;
+                        }
+                        ?>
+                        <span class="<?= $statusClass ?>"><?= htmlspecialchars($order['status']) ?></span>
+                    </td>
                     <td>
                         <button class="btn-sm btn-edit" onclick="editOrder(<?= $order['id'] ?>, '<?= htmlspecialchars($order['items'], ENT_QUOTES) ?>', <?= $order['total'] ?>, '<?= $order['status'] ?>')">✏️</button>
-                        <a href="?delete=<?= $order['id'] ?>" onclick="return confirm('Are you sure?')"><button class="btn-sm btn-delete">🗑️</button></a>
+                        <a href="?delete=<?= $order['id'] ?>" onclick="return confirm('Are you sure you want to delete this order?')">
+                            <button class="btn-sm btn-delete">🗑️</button>
+                        </a>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -469,16 +535,17 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
     </div>
 </div>
 
-<!-- New Order Modal (unchanged) -->
 <div id="newOrderModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="document.getElementById('newOrderModal').style.display='none'">&times;</span>
-        <h2>Create New Order</h2>
+        <div class="modal-header">
+            <h3 class="modal-title">Create New Order</h3>
+            <span class="close" onclick="document.getElementById('newOrderModal').style.display='none'">&times;</span>
+        </div>
         <form method="POST" onsubmit="return calculateTotal()">
             <input type="hidden" name="action" value="create">
             <div class="form-group">
-                <label>Customer</label>
-                <select name="customer_id" class="form-control" required>
+                <label for="customer_id">Customer</label>
+                <select name="customer_id" id="customer_id" class="form-control" required>
                     <option value="">Select Customer</option>
                     <?php
                     $customers = $pdo->query("SELECT * FROM customers ORDER BY name")->fetchAll();
@@ -502,15 +569,15 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
                         </select>
                     </div>
                 </div>
-                <button type="button" class="btn-sm btn-primary" style="margin-top: 10px;" onclick="addItem()">+ Add Another Item</button>
+                <button type="button" class="btn" style="margin-top: 10px;" onclick="addItem()">+ Add Another Item</button>
             </div>
             <div class="form-group">
-                <label>Total ($)</label>
+                <label for="order-total">Total ($)</label>
                 <input type="number" name="total" step="0.01" class="form-control" id="order-total" readonly required>
             </div>
             <div class="form-group">
-                <label>Status</label>
-                <select name="status" class="form-control">
+                <label for="status">Status</label>
+                <select name="status" id="status" class="form-control">
                     <option value="New">New</option>
                     <option value="Preparing">Preparing</option>
                     <option value="Out for Delivery">Out for Delivery</option>
@@ -519,7 +586,7 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
             </div>
             <div class="form-buttons">
                 <button class="btn-cancel" type="button" onclick="document.getElementById('newOrderModal').style.display='none'">Cancel</button>
-                <button class="btn-primary" type="submit">Create Order</button>
+                <button class="btn" type="submit">Create Order</button>
             </div>
         </form>
     </div>
@@ -528,21 +595,23 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
 <!-- Edit Order Modal -->
 <div id="editOrderModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="document.getElementById('editOrderModal').style.display='none'">&times;</span>
-        <h2>Edit Order</h2>
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Order</h3>
+            <span class="close" onclick="document.getElementById('editOrderModal').style.display='none'">&times;</span>
+        </div>
         <form method="POST">
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="order_id" id="edit-order-id">
             <div class="form-group">
-                <label>Items</label>
+                <label for="edit-items">Items</label>
                 <textarea name="items" class="form-control" id="edit-items" required></textarea>
             </div>
             <div class="form-group">
-                <label>Total ($)</label>
+                <label for="edit-total">Total ($)</label>
                 <input type="number" name="total" step="0.01" class="form-control" id="edit-total" required>
             </div>
             <div class="form-group">
-                <label>Status</label>
+                <label for="edit-status">Status</label>
                 <select name="status" class="form-control" id="edit-status">
                     <option value="New">New</option>
                     <option value="Preparing">Preparing</option>
@@ -553,13 +622,31 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
             </div>
             <div class="form-buttons">
                 <button class="btn-cancel" type="button" onclick="document.getElementById('editOrderModal').style.display='none'">Cancel</button>
-                <button class="btn-primary" type="submit">Save Changes</button>
+                <button class="btn" type="submit">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+    const toggleBtn = document.getElementById('toggle-btn');
+    const sidebar = document.getElementById('sidebar');
+
+    toggleBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+    });
+
+    function checkScreenSize() {
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+        } else {
+            sidebar.classList.remove('collapsed');
+        }
+    }
+
+    window.addEventListener('load', checkScreenSize);
+    window.addEventListener('resize', checkScreenSize);
+
     function editOrder(id, items, total, status) {
         document.getElementById('edit-order-id').value = id;
         document.getElementById('edit-items').value = items;
@@ -567,12 +654,14 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
         document.getElementById('edit-status').value = status;
         document.getElementById('editOrderModal').style.display = 'block';
     }
+
     function addItem() {
         const container = document.getElementById('items-container');
         const original = container.firstElementChild.cloneNode(true);
         original.querySelector('select').value = "";
         container.appendChild(original);
     }
+
     function calculateTotal() {
         let total = 0;
         const selects = document.querySelectorAll('.item-select');
@@ -584,6 +673,15 @@ $menu_items = $pdo->query("SELECT * FROM menu")->fetchAll();
         document.getElementById('order-total').value = total.toFixed(2);
         return true;
     }
+
+    window.addEventListener('click', function(event) {
+        const modals = document.getElementsByClassName('modal');
+        for (let i = 0; i < modals.length; i++) {
+            if (event.target === modals[i]) {
+                modals[i].style.display = 'none';
+            }
+        }
+    });
 </script>
 </body>
 </html>

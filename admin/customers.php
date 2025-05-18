@@ -2,33 +2,25 @@
 <?php
 require 'db.php';
 
-// Handle customer deletion
 if (isset($_GET['delete'])) {
     try {
         $id = intval($_GET['delete']);
 
-        // Start a transaction
         $pdo->beginTransaction();
 
-        // First delete related orders
         $pdo->prepare("DELETE FROM orders WHERE customer_id = ?")->execute([$id]);
 
-        // Then delete the customer
         $pdo->prepare("DELETE FROM customers WHERE id = ?")->execute([$id]);
 
-        // Commit the transaction
         $pdo->commit();
 
-        // Set success message
         $_SESSION['success_message'] = "Customer and all related orders deleted successfully.";
 
         header('Location: customers.php');
         exit;
     } catch (PDOException $e) {
-        // Rollback the transaction if something failed
         $pdo->rollBack();
 
-        // Set error message
         $_SESSION['error_message'] = "Could not delete customer. This customer may have associated records.";
 
         header('Location: customers.php');
@@ -36,24 +28,19 @@ if (isset($_GET['delete'])) {
     }
 }
 
-// Handle adding a new customer
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
-    // Get form data
     $name = $_POST['name'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
     $address = $_POST['address'];
 
-    // Insert into database
     $stmt = $pdo->prepare("INSERT INTO customers (name, email, phone, address) VALUES (?, ?, ?, ?)");
     $stmt->execute([$name, $email, $phone, $address]);
 
-    // Redirect to prevent multiple submissions
     header("Location: customers.php");
     exit();
 }
 
-// Handle editing a customer
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'update') {
     $id = intval($_POST['customer_id']);
     $name = $_POST['name'];
@@ -67,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     exit;
 }
 
-// Handle edit request - fetch customer data
 if (isset($_GET['edit'])) {
     $edit_id = intval($_GET['edit']);
     $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
@@ -75,7 +61,6 @@ if (isset($_GET['edit'])) {
     $edit_customer = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-// Get all customers
 $stmt = $pdo->query("SELECT c.*, 
                      COUNT(o.id) as order_count, 
                      SUM(o.total) as total_spent,
@@ -85,7 +70,6 @@ $stmt = $pdo->query("SELECT c.*,
                      GROUP BY c.id");
 $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Start session if not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -98,99 +82,24 @@ if (session_status() == PHP_SESSION_NONE) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Management</title>
     <style>
-        :root {
-            --primary: #5b48da;
-            --primary-light: #8172e6;
-            --secondary: #24263c;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --warning: #f39c12;
-            --info: #3498db;
-            --light: #f8f9fa;
-            --dark: #1a1c2d;
-            --border: #e9ecef;
-        }
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f8f3e9;
             display: flex;
             min-height: 100vh;
         }
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
 
-        .btn-edit {
-            background-color: var(--info);
-            color: white;
-            border: none;
-            border-radius: 3px;
-            margin-right: 5px;
-            cursor: pointer;
-        }
-
-        .btn-delete {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            color: white;
-        }
-        .badge-danger {
-            background-color: var(--danger);
-        }
-        .user-image {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 5px;
-        }
-
-        .user-container {
-            display: flex;
-            align-items: center;
-        }
-        .badge-primary {
-            background-color: var(--primary);
-        }
-
-        .badge-success {
-            background-color: var(--success);
-        }
-
-        .badge-warning {
-            background-color: var(--warning);
-        }
-
-        .badge-danger {
-            background-color: var(--danger);
-        }
-
-        .badge-info {
-            background-color: var(--info);
-        }
-
-        /* Sidebar */
         .sidebar {
             width: 250px;
-            background-color: #fff;
+            background-color: #5D4037;
             padding: 20px 15px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
             height: 100vh;
             transition: all 0.3s ease;
             position: fixed;
@@ -198,6 +107,7 @@ if (session_status() == PHP_SESSION_NONE) {
             left: 0;
             overflow-x: hidden;
             z-index: 100;
+            color: #D7CCC8;
         }
 
         .sidebar.collapsed {
@@ -209,13 +119,16 @@ if (session_status() == PHP_SESSION_NONE) {
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #8D6E63;
+            padding-bottom: 15px;
         }
 
         .sidebar .brand h2 {
             font-size: 18px;
             white-space: nowrap;
             transition: opacity 0.3s;
+            color: #FFECB3;
         }
 
         .sidebar.collapsed .brand h2 {
@@ -228,7 +141,7 @@ if (session_status() == PHP_SESSION_NONE) {
             background: none;
             border: none;
             cursor: pointer;
-            color: #5b48da;
+            color: #FFECB3;
             padding: 5px;
             z-index: 101;
         }
@@ -244,10 +157,12 @@ if (session_status() == PHP_SESSION_NONE) {
         .menu-category {
             font-size: 14px;
             font-weight: bold;
-            color: #888;
-            margin: 10px 0;
+            color: #BCAAA4;
+            margin: 15px 0 10px 10px;
             white-space: nowrap;
             transition: opacity 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .sidebar.collapsed .menu-category {
@@ -263,18 +178,18 @@ if (session_status() == PHP_SESSION_NONE) {
         .menu-item a {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             text-decoration: none;
-            color: #333;
-            padding: 8px 12px;
+            color: #EFEBE9;
+            padding: 10px 12px;
             border-radius: 6px;
             transition: background-color 0.2s;
         }
 
         .menu-item a:hover,
         .menu-item.active a {
-            background-color: #5b48da;
-            color: #fff;
+            background-color: #8D6E63;
+            color: #FFF8E1;
         }
 
         .menu-item a i {
@@ -287,10 +202,9 @@ if (session_status() == PHP_SESSION_NONE) {
             display: none;
         }
 
-        /* Main content adjustment */
         .main-content {
             margin-left: 250px;
-            padding: 20px;
+            padding: 25px;
             flex-grow: 1;
             transition: margin-left 0.3s ease;
             width: calc(100% - 250px);
@@ -301,44 +215,103 @@ if (session_status() == PHP_SESSION_NONE) {
             width: calc(100% - 70px);
         }
 
-        /* Table Card */
-        .table-card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-        }
-
-        .table-card-header {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            margin-bottom: 30px;
+            background-color: #D7CCC8;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: #4E342E;
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
 
-        .table-card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--secondary);
+        .page-title:before {
+            content: "👥";
+            font-size: 28px;
         }
 
-        .btn-primary {
-            background-color: var(--primary);
+        .btn {
+            padding: 10px 18px;
+            background-color: #8D6E63;
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s;
+            transition: background-color 0.2s;
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-light);
+        .btn:hover {
+            background-color: #6D4C41;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .btn-edit {
+            background-color: #8D6E63;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background-color: #B71C1C;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            background-color: #8D6E63;
+        }
+
+        .badge-primary {
+            background-color: #6D4C41;
+        }
+
+        .badge-success {
+            background-color: #4CAF50;
+        }
+
+        .badge-warning {
+            background-color: #FF9800;
+        }
+
+        .badge-info {
+            background-color: #2196F3;
+        }
+
+        .badge-danger {
+            background-color: #B71C1C;
+        }
+
+        .table-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-x: auto;
         }
 
         table {
@@ -348,14 +321,14 @@ if (session_status() == PHP_SESSION_NONE) {
         }
 
         th, td {
-            padding: 12px 15px;
+            padding: 15px;
             text-align: left;
         }
 
         th {
-            background-color: #f8f9fa;
+            background-color: #EFEBE9;
             font-weight: 500;
-            color: #777;
+            color: #5D4037;
             font-size: 14px;
         }
 
@@ -363,7 +336,10 @@ if (session_status() == PHP_SESSION_NONE) {
             border-bottom: 1px solid #f1f1f1;
         }
 
-        /* Modal */
+        tbody tr:hover {
+            background-color: #FFF8E1;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -372,45 +348,76 @@ if (session_status() == PHP_SESSION_NONE) {
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
             overflow: auto;
         }
 
         .modal-content {
-            background-color: white;
+            background-color: #fefefe;
             margin: 10% auto;
-            padding: 20px;
+            padding: 25px;
             border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            width: 500px;
+            max-width: 90%;
+            border-top: 5px solid #8D6E63;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #5D4037;
         }
 
         .close {
-            position: absolute;
-            right: 15px;
-            top: 10px;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
             cursor: pointer;
+            color: #8D6E63;
+        }
+
+        .close:hover {
+            color: #5D4037;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 500;
+            color: #5D4037;
         }
 
         .form-control {
             width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #ddd;
+            padding: 10px 12px;
+            border: 1px solid #D7CCC8;
             border-radius: 4px;
+            transition: border-color 0.2s;
             font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #8D6E63;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235D4037' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 28px;
         }
 
         .form-buttons {
@@ -421,15 +428,19 @@ if (session_status() == PHP_SESSION_NONE) {
         }
 
         .btn-cancel {
-            background-color: #f1f1f1;
-            color: #333;
+            background-color: #EFEBE9;
+            color: #5D4037;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 10px 18px;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 14px;
         }
 
-        /* Alert messages */
+        .btn-cancel:hover {
+            background-color: #D7CCC8;
+        }
+
         .alert {
             padding: 15px;
             margin-bottom: 20px;
@@ -439,51 +450,57 @@ if (session_status() == PHP_SESSION_NONE) {
         }
 
         .alert-success {
-            background-color: var(--success);
+            background-color: #4CAF50;
         }
 
         .alert-danger {
-            background-color: var(--danger);
+            background-color: #B71C1C;
         }
 
-        /* Responsive adjustments */
+        .user-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-image {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
             }
-
             .sidebar .brand h2,
             .sidebar .menu-category,
             .sidebar .menu-item span {
                 display: none;
             }
-
             .main-content {
                 margin-left: 70px;
                 width: calc(100% - 70px);
             }
-
             .sidebar.expanded {
                 width: 250px;
             }
-
             .sidebar.expanded .brand h2,
             .sidebar.expanded .menu-category,
             .sidebar.expanded .menu-item span {
                 display: block;
                 opacity: 1;
             }
-
-            .table-card-header {
+            .header {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 15px;
             }
-
             .form-buttons {
                 flex-direction: column;
             }
-
-            .btn-cancel, .btn-primary {
+            .btn-cancel, .btn {
                 width: 100%;
                 text-align: center;
             }
@@ -491,14 +508,13 @@ if (session_status() == PHP_SESSION_NONE) {
     </style>
 </head>
 <body>
-<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <div class="brand">
         <button class="hamburger" id="toggle-btn">☰</button>
-        <h2>Dashboard</h2>
+        <h2>Brew & Bean</h2>
     </div>
     <div class="sidebar-menu">
-        <p class="menu-category">Main</p>
+        <p class="menu-category">Management</p>
         <ul>
             <li class="menu-item">
                 <a href="index.php"><i>📊</i> <span>Dashboard</span></a>
@@ -516,7 +532,6 @@ if (session_status() == PHP_SESSION_NONE) {
     </div>
 </div>
 
-<!-- Main content -->
 <div class="main-content">
     <?php if (isset($_SESSION['error_message'])): ?>
         <div class="alert alert-danger">
@@ -536,12 +551,12 @@ if (session_status() == PHP_SESSION_NONE) {
         </div>
     <?php endif; ?>
 
-    <div class="table-card">
-        <div class="table-card-header">
-            <h3 class="table-card-title">Customer Management</h3>
-            <button class="btn-primary" onclick="document.getElementById('newCustomerModal').style.display='block'">+ New Customer</button>
-        </div>
+    <div class="header">
+        <h2 class="page-title">Customer Management</h2>
+        <button class="btn" onclick="document.getElementById('newCustomerModal').style.display='block'">+ New Customer</button>
+    </div>
 
+    <div class="table-card">
         <table>
             <thead>
             <tr>
@@ -587,8 +602,10 @@ if (session_status() == PHP_SESSION_NONE) {
                         }
                         ?></td>
                     <td>
-                        <a href="?edit=<?php echo $customer['id']; ?>"><button class="btn-sm btn-edit">✏️</button></a>
-                        <a href="?delete=<?php echo $customer['id']; ?>" onclick="return confirm('Are you sure you want to delete this customer? This will also delete all associated orders.')"><button class="btn-sm btn-delete">🗑️</button></a>
+                        <button class="btn-sm btn-edit" onclick="editCustomer(<?= $customer['id'] ?>, '<?= htmlspecialchars($customer['name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($customer['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($customer['phone'], ENT_QUOTES) ?>', '<?= htmlspecialchars($customer['address'], ENT_QUOTES) ?>')">✏️</button>
+                        <a href="?delete=<?php echo $customer['id']; ?>" onclick="return confirm('Are you sure you want to delete this customer? This will also delete all associated orders.')">
+                            <button class="btn-sm btn-delete">🗑️</button>
+                        </a>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -597,12 +614,12 @@ if (session_status() == PHP_SESSION_NONE) {
     </div>
 </div>
 
-<!-- New Customer Modal -->
-<div id="newCustomerModal" class="modal" <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'create' && !empty($errors)) echo 'style="display:block"'; ?>>
+<div id="newCustomerModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="document.getElementById('newCustomerModal').style.display='none'">&times;</span>
-        <h2 style="margin-bottom: 20px;">Add New Customer</h2>
-
+        <div class="modal-header">
+            <h3 class="modal-title">Create New Customer</h3>
+            <span class="close" onclick="document.getElementById('newCustomerModal').style.display='none'">&times;</span>
+        </div>
         <form method="POST">
             <input type="hidden" name="action" value="create">
             <div class="form-group">
@@ -627,55 +644,53 @@ if (session_status() == PHP_SESSION_NONE) {
 
             <div class="form-buttons">
                 <button type="button" class="btn-cancel" onclick="document.getElementById('newCustomerModal').style.display='none'">Cancel</button>
-                <button type="submit" class="btn-primary">Add Customer</button>
+                <button type="submit" class="btn">Add Customer</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Edit Customer Modal -->
-<div id="editCustomerModal" class="modal" <?php if (isset($edit_customer)) echo 'style="display:block"'; ?>>
+<div id="editCustomerModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="window.location.href='customers.php'">&times;</span>
-        <h2>Edit Customer</h2>
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Customer</h3>
+            <span class="close" onclick="document.getElementById('editCustomerModal').style.display='none'">&times;</span>
+        </div>
         <form method="POST">
             <input type="hidden" name="action" value="update">
-            <input type="hidden" name="customer_id" value="<?php echo isset($edit_customer) ? $edit_customer['id'] : ''; ?>">
+            <input type="hidden" name="customer_id" id="edit-customer-id">
             <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" name="name" class="form-control" value="<?php echo isset($edit_customer) ? htmlspecialchars($edit_customer['name']) : ''; ?>" required>
+                <label for="edit-name">Full Name</label>
+                <input type="text" id="edit-name" name="name" class="form-control" required>
             </div>
             <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" name="email" class="form-control" value="<?php echo isset($edit_customer) ? htmlspecialchars($edit_customer['email']) : ''; ?>" required>
+                <label for="edit-email">Email Address</label>
+                <input type="email" id="edit-email" name="email" class="form-control" required>
             </div>
             <div class="form-group">
-                <label>Phone Number</label>
-                <input type="tel" name="phone" class="form-control" value="<?php echo isset($edit_customer) ? htmlspecialchars($edit_customer['phone']) : ''; ?>" required>
+                <label for="edit-phone">Phone Number</label>
+                <input type="tel" id="edit-phone" name="phone" class="form-control" required>
             </div>
             <div class="form-group">
-                <label>Address</label>
-                <textarea name="address" class="form-control" required><?php echo isset($edit_customer) ? htmlspecialchars($edit_customer['address']) : ''; ?></textarea>
+                <label for="edit-address">Address</label>
+                <textarea id="edit-address" name="address" class="form-control" required></textarea>
             </div>
             <div class="form-buttons">
-                <button class="btn-cancel" type="button" onclick="window.location.href='customers.php'">Cancel</button>
-                <button class="btn-primary" type="submit">Save Changes</button>
+                <button class="btn-cancel" type="button" onclick="document.getElementById('editCustomerModal').style.display='none'">Cancel</button>
+                <button class="btn" type="submit">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    // Get the toggle button and sidebar elements
     const toggleBtn = document.getElementById('toggle-btn');
     const sidebar = document.getElementById('sidebar');
 
-    // Add click event listener to the toggle button
     toggleBtn.addEventListener('click', function() {
         sidebar.classList.toggle('collapsed');
     });
 
-    // For mobile devices, check if collapsed state should be default
     function checkScreenSize() {
         if (window.innerWidth <= 768) {
             sidebar.classList.add('collapsed');
@@ -684,7 +699,18 @@ if (session_status() == PHP_SESSION_NONE) {
         }
     }
 
-    // Auto-close alerts after 5 seconds
+    window.addEventListener('load', checkScreenSize);
+    window.addEventListener('resize', checkScreenSize);
+
+    function editCustomer(id, name, email, phone, address) {
+        document.getElementById('edit-customer-id').value = id;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-email').value = email;
+        document.getElementById('edit-phone').value = phone;
+        document.getElementById('edit-address').value = address;
+        document.getElementById('editCustomerModal').style.display = 'block';
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
@@ -698,9 +724,14 @@ if (session_status() == PHP_SESSION_NONE) {
         });
     });
 
-    // Check screen size on load and resize
-    window.addEventListener('load', checkScreenSize);
-    window.addEventListener('resize', checkScreenSize);
+    window.addEventListener('click', function(event) {
+        const modals = document.getElementsByClassName('modal');
+        for (let i = 0; i < modals.length; i++) {
+            if (event.target === modals[i]) {
+                modals[i].style.display = 'none';
+            }
+        }
+    });
 </script>
 </body>
 </html>
